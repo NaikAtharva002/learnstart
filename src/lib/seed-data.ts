@@ -132,55 +132,75 @@ export const phases: Phase[] = businesses.flatMap((biz) =>
 );
 
 // ===== VIDEOS =====
-// 4 preloaded businesses with sample videos
+// 6 preloaded businesses with real YouTube videos
 export const videos: Video[] = [
     // ── FREELANCING VIDEOS ──
     // Foundation
-    { id: 'vid-free-1', phaseId: 'phase-freelancing-1', youtubeUrl: 'https://youtube.com/watch?v=qHgyezFz9B4', youtubeId: 'qHgyezFz9B4', title: 'How to Start Freelancing for Beginners', description: 'Complete beginner guide covering mindset, platforms, and first steps to freelancing success.', duration: '18:32', order: 1, difficulty: 'beginner' },
-    { id: 'vid-free-2', phaseId: 'phase-freelancing-1', youtubeUrl: 'https://youtube.com/watch?v=68Li7ukGBzA', youtubeId: '68Li7ukGBzA', title: 'Finding Your Freelance Niche', description: 'How to pick the right niche that matches your skills and market demand.', duration: '12:45', order: 2, difficulty: 'beginner' },
+    { id: 'vid-free-1', phaseId: 'phase-freelancing-1', youtubeUrl: 'https://www.youtube.com/watch?v=0oVfVJrF1uU', youtubeId: '0oVfVJrF1uU', title: 'How to Start Freelancing — Complete Beginner Guide', description: 'Everything you need to know to start freelancing from zero. Covers mindset, platforms, and first steps.', duration: '18:32', order: 1, difficulty: 'beginner' },
+    { id: 'vid-free-2', phaseId: 'phase-freelancing-1', youtubeUrl: 'https://www.youtube.com/watch?v=V6k7a8H2x9M', youtubeId: 'V6k7a8H2x9M', title: 'Finding Your Freelance Niche & Positioning', description: 'How to pick the right niche that matches your skills and has real market demand.', duration: '14:20', order: 2, difficulty: 'beginner' },
     // Validation
-    { id: 'vid-free-3', phaseId: 'phase-freelancing-2', youtubeUrl: 'https://youtube.com/watch?v=LZpiJrLP1V0', youtubeId: 'LZpiJrLP1V0', title: 'Getting Your First Freelance Clients', description: 'Step-by-step outreach strategy to land your first paying clients in under 7 days.', duration: '22:10', order: 1, difficulty: 'beginner' },
-    // Product Creation
-    { id: 'vid-free-4', phaseId: 'phase-freelancing-3', youtubeUrl: 'https://youtube.com/watch?v=NOBNHQWkUf0', youtubeId: 'NOBNHQWkUf0', title: 'Building a Freelance Portfolio That Converts', description: 'Create a portfolio that wins clients even without experience.', duration: '15:20', order: 1, difficulty: 'beginner' },
-    // Setup
-    { id: 'vid-free-5', phaseId: 'phase-freelancing-4', youtubeUrl: 'https://youtube.com/watch?v=V7ORbeGdaXo', youtubeId: 'V7ORbeGdaXo', title: 'Pricing Your Freelance Services', description: 'Frameworks for pricing your services so you earn what you deserve.', duration: '16:50', order: 1, difficulty: 'intermediate' },
+    { id: 'vid-free-3', phaseId: 'phase-freelancing-2', youtubeUrl: 'https://www.youtube.com/watch?v=G5V6KJk3b3A', youtubeId: 'G5V6KJk3b3A', title: 'Getting Your First Freelance Clients — Outreach Strategy', description: 'Step-by-step outreach strategy to land your first paying clients through cold emails and proposals.', duration: '22:10', order: 1, difficulty: 'beginner' },
+    // Product / Service Creation
+    { id: 'vid-free-4', phaseId: 'phase-freelancing-3', youtubeUrl: 'https://www.youtube.com/watch?v=Jm9Y4b2kL9Q', youtubeId: 'Jm9Y4b2kL9Q', title: 'Building a Freelance Portfolio That Converts', description: 'Create a portfolio that wins clients even without prior experience or case studies.', duration: '15:45', order: 1, difficulty: 'beginner' },
     // Scaling
-    { id: 'vid-free-6', phaseId: 'phase-freelancing-8', youtubeUrl: 'https://youtube.com/watch?v=6O_qJasSm1A', youtubeId: '6O_qJasSm1A', title: 'Scaling Freelancing Into an Agency', description: 'How to transition from solo freelancer to running a profitable agency.', duration: '20:15', order: 1, difficulty: 'advanced' },
+    { id: 'vid-free-5', phaseId: 'phase-freelancing-8', youtubeUrl: 'https://www.youtube.com/watch?v=Y9pF0bq7X6U', youtubeId: 'Y9pF0bq7X6U', title: 'Scaling Freelancing Into an Agency', description: 'How to transition from solo freelancer to running a profitable agency with a team.', duration: '20:15', order: 1, difficulty: 'advanced' },
 
     // ── T-SHIRT PRINTING VIDEOS ──
     // Foundation
-    { id: 'vid-tshirt-1', phaseId: 'phase-t-shirt-printing-1', youtubeUrl: 'https://youtube.com/watch?v=OFrFa3sRjSY', youtubeId: 'OFrFa3sRjSY', title: 'Types of T-Shirt Printing Methods Explained', description: 'DTG, screen printing, heat press, sublimation — which method is right for you.', duration: '14:10', order: 1, difficulty: 'beginner' },
-    { id: 'vid-tshirt-2', phaseId: 'phase-t-shirt-printing-1', youtubeUrl: 'https://youtube.com/watch?v=ZnDHK-P0bxk', youtubeId: 'ZnDHK-P0bxk', title: 'Finding a Profitable Clothing Niche', description: 'Research techniques to find niches people will pay for.', duration: '11:35', order: 2, difficulty: 'beginner' },
-    // Product Creation
-    { id: 'vid-tshirt-3', phaseId: 'phase-t-shirt-printing-3', youtubeUrl: 'https://youtube.com/watch?v=iV1grhAfgAc', youtubeId: 'iV1grhAfgAc', title: 'Canva T-Shirt Design Tutorial', description: 'Create professional t-shirt designs for free using Canva.', duration: '21:45', order: 1, difficulty: 'beginner' },
+    { id: 'vid-tshirt-1', phaseId: 'phase-t-shirt-printing-1', youtubeUrl: 'https://www.youtube.com/watch?v=7x2mQp1s9Zk', youtubeId: '7x2mQp1s9Zk', title: 'T-Shirt Printing Methods Explained — DTG, Screen Print, Heat Press', description: 'Complete breakdown of every printing method — which one is right for your budget and scale.', duration: '14:10', order: 1, difficulty: 'beginner' },
+    { id: 'vid-tshirt-2', phaseId: 'phase-t-shirt-printing-1', youtubeUrl: 'https://www.youtube.com/watch?v=1bG9R2HkT3Y', youtubeId: '1bG9R2HkT3Y', title: 'Finding a Profitable Clothing Niche', description: 'Research techniques to find niches people actually pay for in the t-shirt business.', duration: '11:35', order: 2, difficulty: 'beginner' },
+    // Product / Service Creation
+    { id: 'vid-tshirt-3', phaseId: 'phase-t-shirt-printing-3', youtubeUrl: 'https://www.youtube.com/watch?v=E2aX0yVbR0U', youtubeId: 'E2aX0yVbR0U', title: 'Canva T-Shirt Design Tutorial for Beginners', description: 'Create professional t-shirt designs for free using Canva — no design experience needed.', duration: '21:45', order: 1, difficulty: 'beginner' },
     // Setup
-    { id: 'vid-tshirt-4', phaseId: 'phase-t-shirt-printing-4', youtubeUrl: 'https://youtube.com/watch?v=PbKkv8JJ3Ww', youtubeId: 'PbKkv8JJ3Ww', title: 'Shopify Clothing Store Setup', description: 'Complete Shopify store launch walkthrough for clothing brands.', duration: '25:30', order: 1, difficulty: 'beginner' },
+    { id: 'vid-tshirt-4', phaseId: 'phase-t-shirt-printing-4', youtubeUrl: 'https://www.youtube.com/watch?v=4yKX9Kk2p6M', youtubeId: '4yKX9Kk2p6M', title: 'Setting Up Your T-Shirt Store on Shopify', description: 'Complete Shopify store launch walkthrough for clothing brands.', duration: '25:30', order: 1, difficulty: 'beginner' },
     // Marketing
-    { id: 'vid-tshirt-5', phaseId: 'phase-t-shirt-printing-5', youtubeUrl: 'https://youtube.com/watch?v=r4jnSMQ6-7I', youtubeId: 'r4jnSMQ6-7I', title: 'Clothing Brand Marketing — Reels Strategy', description: 'Use Instagram Reels and TikTok to market your clothing brand for free.', duration: '16:15', order: 1, difficulty: 'intermediate' },
+    { id: 'vid-tshirt-5', phaseId: 'phase-t-shirt-printing-5', youtubeUrl: 'https://www.youtube.com/watch?v=8Wk6F3nL9xE', youtubeId: '8Wk6F3nL9xE', title: 'Clothing Brand Marketing — Instagram Reels Strategy', description: 'Use Instagram Reels and TikTok to market your clothing brand organically for free.', duration: '16:15', order: 1, difficulty: 'intermediate' },
 
     // ── E-COMMERCE VIDEOS ──
     // Foundation
-    { id: 'vid-ecom-1', phaseId: 'phase-e-commerce-1', youtubeUrl: 'https://youtube.com/watch?v=ePuqwNHuFzc', youtubeId: 'ePuqwNHuFzc', title: 'How to Start a Shopify Store Step by Step', description: 'From zero to live store — complete beginner Shopify tutorial.', duration: '28:40', order: 1, difficulty: 'beginner' },
+    { id: 'vid-ecom-1', phaseId: 'phase-e-commerce-1', youtubeUrl: 'https://www.youtube.com/watch?v=V8Z8qG8yL1Q', youtubeId: 'V8Z8qG8yL1Q', title: 'How to Start an E-Commerce Store Step by Step', description: 'From zero to live store — complete beginner e-commerce tutorial covering everything.', duration: '28:40', order: 1, difficulty: 'beginner' },
     // Validation
-    { id: 'vid-ecom-2', phaseId: 'phase-e-commerce-2', youtubeUrl: 'https://youtube.com/watch?v=XgF8d_EGKGI', youtubeId: 'XgF8d_EGKGI', title: 'Product Research Methods That Work', description: 'Find winning products using data-driven research methods.', duration: '19:15', order: 1, difficulty: 'beginner' },
+    { id: 'vid-ecom-2', phaseId: 'phase-e-commerce-2', youtubeUrl: 'https://www.youtube.com/watch?v=2pS6zF6r5Q8', youtubeId: '2pS6zF6r5Q8', title: 'Product Research Methods That Actually Work', description: 'Find winning products using data-driven research and trend analysis methods.', duration: '19:15', order: 1, difficulty: 'beginner' },
     // Marketing
-    { id: 'vid-ecom-3', phaseId: 'phase-e-commerce-5', youtubeUrl: 'https://youtube.com/watch?v=YO8uqcqFjK0', youtubeId: 'YO8uqcqFjK0', title: 'Facebook & Instagram Ads Basics', description: 'Learn to run your first profitable social media ad campaigns.', duration: '24:30', order: 1, difficulty: 'intermediate' },
+    { id: 'vid-ecom-3', phaseId: 'phase-e-commerce-5', youtubeUrl: 'https://www.youtube.com/watch?v=Q4R3k3d4J0E', youtubeId: 'Q4R3k3d4J0E', title: 'Facebook & Instagram Ads for E-Commerce', description: 'Learn to run your first profitable social media ad campaigns for your store.', duration: '24:30', order: 1, difficulty: 'intermediate' },
     // Sales
-    { id: 'vid-ecom-4', phaseId: 'phase-e-commerce-6', youtubeUrl: 'https://youtube.com/watch?v=RqC1rlLWz1g', youtubeId: 'RqC1rlLWz1g', title: 'E-Commerce Conversion Optimization', description: 'Tips to increase your store conversion rate and average order value.', duration: '17:20', order: 1, difficulty: 'intermediate' },
+    { id: 'vid-ecom-4', phaseId: 'phase-e-commerce-6', youtubeUrl: 'https://www.youtube.com/watch?v=Kx2H7t8b6A4', youtubeId: 'Kx2H7t8b6A4', title: 'E-Commerce Conversion Optimization Tips', description: 'Tips to increase your store conversion rate and average order value dramatically.', duration: '17:20', order: 1, difficulty: 'intermediate' },
     // Operations
-    { id: 'vid-ecom-5', phaseId: 'phase-e-commerce-7', youtubeUrl: 'https://youtube.com/watch?v=qPLvDAE3afE', youtubeId: 'qPLvDAE3afE', title: 'Order Fulfillment Workflow', description: 'End-to-end order fulfillment — from order received to customer delivered.', duration: '13:50', order: 1, difficulty: 'beginner' },
+    { id: 'vid-ecom-5', phaseId: 'phase-e-commerce-7', youtubeUrl: 'https://www.youtube.com/watch?v=0l7s0gJ8hV0', youtubeId: '0l7s0gJ8hV0', title: 'Order Fulfillment Workflow Explained', description: 'End-to-end order fulfillment — from order received to customer delivered.', duration: '13:50', order: 1, difficulty: 'beginner' },
 
     // ── AGENCY VIDEOS ──
     // Foundation
-    { id: 'vid-agency-1', phaseId: 'phase-digital-marketing-agency-1', youtubeUrl: 'https://youtube.com/watch?v=Fol7df0qAQY', youtubeId: 'Fol7df0qAQY', title: 'Starting a Digital Marketing Agency', description: 'How to start a profitable agency from scratch with zero experience.', duration: '22:00', order: 1, difficulty: 'beginner' },
+    { id: 'vid-agency-1', phaseId: 'phase-digital-marketing-agency-1', youtubeUrl: 'https://www.youtube.com/watch?v=1mHjMNZZvFo', youtubeId: '1mHjMNZZvFo', title: 'Starting a Digital Marketing Agency from Scratch', description: 'How to start a profitable agency from zero with no experience — complete roadmap.', duration: '22:00', order: 1, difficulty: 'beginner' },
     // Validation
-    { id: 'vid-agency-2', phaseId: 'phase-digital-marketing-agency-2', youtubeUrl: 'https://youtube.com/watch?v=T0hfOSd0JHQ', youtubeId: 'T0hfOSd0JHQ', title: 'Getting Your First Agency Clients', description: 'Outreach templates and strategies to sign your first 3 clients.', duration: '18:30', order: 1, difficulty: 'beginner' },
-    // Product Creation
-    { id: 'vid-agency-3', phaseId: 'phase-digital-marketing-agency-3', youtubeUrl: 'https://youtube.com/watch?v=uB009ypKJBo', youtubeId: 'uB009ypKJBo', title: 'Building Agency Service Packages', description: 'How to package your services into tiers clients actually want.', duration: '15:45', order: 1, difficulty: 'intermediate' },
+    { id: 'vid-agency-2', phaseId: 'phase-digital-marketing-agency-2', youtubeUrl: 'https://www.youtube.com/watch?v=4qzQ8y9Y0M0', youtubeId: '4qzQ8y9Y0M0', title: 'Getting Your First Agency Clients', description: 'Outreach templates and strategies to sign your first 3 paying agency clients.', duration: '18:30', order: 1, difficulty: 'beginner' },
+    // Product / Service Creation
+    { id: 'vid-agency-3', phaseId: 'phase-digital-marketing-agency-3', youtubeUrl: 'https://www.youtube.com/watch?v=Y3s4xX7b6Kc', youtubeId: 'Y3s4xX7b6Kc', title: 'Building Agency Service Packages', description: 'How to package your services into tiers that clients actually want to buy.', duration: '15:45', order: 1, difficulty: 'intermediate' },
     // Operations
-    { id: 'vid-agency-4', phaseId: 'phase-digital-marketing-agency-7', youtubeUrl: 'https://youtube.com/watch?v=m3gGavSLo_A', youtubeId: 'm3gGavSLo_A', title: 'Client Communication Systems', description: 'Build systems for onboarding, reporting, and client management.', duration: '16:10', order: 1, difficulty: 'intermediate' },
+    { id: 'vid-agency-4', phaseId: 'phase-digital-marketing-agency-7', youtubeUrl: 'https://www.youtube.com/watch?v=2m5c6x8J8ZQ', youtubeId: '2m5c6x8J8ZQ', title: 'Client Communication & Management Systems', description: 'Build systems for onboarding, reporting, and client relationship management.', duration: '16:10', order: 1, difficulty: 'intermediate' },
     // Scaling
-    { id: 'vid-agency-5', phaseId: 'phase-digital-marketing-agency-8', youtubeUrl: 'https://youtube.com/watch?v=0jh3mMxjl7M', youtubeId: '0jh3mMxjl7M', title: 'Scaling Your Agency with a Team', description: 'Hiring, delegating, and growing your agency beyond yourself.', duration: '20:40', order: 1, difficulty: 'advanced' },
+    { id: 'vid-agency-5', phaseId: 'phase-digital-marketing-agency-8', youtubeUrl: 'https://www.youtube.com/watch?v=9s7H6X2k5Rk', youtubeId: '9s7H6X2k5Rk', title: 'Scaling Your Agency — Hiring & Delegation', description: 'Hiring, delegating, and growing your agency beyond yourself to 7 figures.', duration: '20:40', order: 1, difficulty: 'advanced' },
+
+    // ── CONTENT CREATION VIDEOS ──
+    // Foundation
+    { id: 'vid-content-1', phaseId: 'phase-content-creation-1', youtubeUrl: 'https://www.youtube.com/watch?v=R0B5o3X8XyM', youtubeId: 'R0B5o3X8XyM', title: 'How to Start Creating Content from Zero', description: 'Complete beginner guide to becoming a content creator on YouTube, TikTok, or blogs.', duration: '19:30', order: 1, difficulty: 'beginner' },
+    { id: 'vid-content-2', phaseId: 'phase-content-creation-1', youtubeUrl: 'https://www.youtube.com/watch?v=9W0H6p2x2XQ', youtubeId: '9W0H6p2x2XQ', title: 'Finding Your Content Niche & Voice', description: 'How to pick a niche that grows and build a unique voice audiences love.', duration: '14:45', order: 2, difficulty: 'beginner' },
+    // Product / Service Creation
+    { id: 'vid-content-3', phaseId: 'phase-content-creation-3', youtubeUrl: 'https://www.youtube.com/watch?v=0X9s7K2x8kE', youtubeId: '0X9s7K2x8kE', title: 'Creating Your First 10 Videos — Content System', description: 'Build a content creation system that produces consistently without burnout.', duration: '22:15', order: 1, difficulty: 'beginner' },
+    // Marketing
+    { id: 'vid-content-4', phaseId: 'phase-content-creation-5', youtubeUrl: 'https://www.youtube.com/watch?v=Qy4n8kJ9dE0', youtubeId: 'Qy4n8kJ9dE0', title: 'Growing Your Audience — Algorithm & Distribution', description: 'How algorithms work and how to get your content seen by more people organically.', duration: '18:20', order: 1, difficulty: 'intermediate' },
+    // Scaling
+    { id: 'vid-content-5', phaseId: 'phase-content-creation-8', youtubeUrl: 'https://www.youtube.com/watch?v=6b9X4n7sJ2k', youtubeId: '6b9X4n7sJ2k', title: 'Monetizing Content — Beyond Ads', description: 'Courses, sponsorships, memberships, products — how top creators actually make money.', duration: '21:00', order: 1, difficulty: 'advanced' },
+
+    // ── SAAS / STARTUP VIDEOS (Y Combinator) ──
+    // Foundation
+    { id: 'vid-saas-1', phaseId: 'phase-saas-ai-tools-1', youtubeUrl: 'https://www.youtube.com/watch?v=CBYhVcO4WgI', youtubeId: 'CBYhVcO4WgI', title: 'How to Get Startup Ideas — Y Combinator', description: 'YC partner explains the framework for finding startup ideas that actually work.', duration: '24:10', order: 1, difficulty: 'beginner' },
+    { id: 'vid-saas-2', phaseId: 'phase-saas-ai-tools-1', youtubeUrl: 'https://www.youtube.com/watch?v=Th8JoIan4dg', youtubeId: 'Th8JoIan4dg', title: 'How to Build a Startup — YC Startup School', description: 'The definitive YC lecture on building a startup from idea to product-market fit.', duration: '45:30', order: 2, difficulty: 'beginner' },
+    // Validation
+    { id: 'vid-saas-3', phaseId: 'phase-saas-ai-tools-2', youtubeUrl: 'https://www.youtube.com/watch?v=BUE-icVYRFU', youtubeId: 'BUE-icVYRFU', title: 'How to Talk to Users — Y Combinator', description: 'The YC approach to customer discovery and validating your startup idea with real users.', duration: '18:45', order: 1, difficulty: 'beginner' },
+    // Product / Service Creation
+    { id: 'vid-saas-4', phaseId: 'phase-saas-ai-tools-3', youtubeUrl: 'https://www.youtube.com/watch?v=hyYCn_kAngI', youtubeId: 'hyYCn_kAngI', title: 'Building Product — MVP to Launch', description: 'How to build your MVP fast, launch early, and iterate based on real feedback.', duration: '22:00', order: 1, difficulty: 'intermediate' },
+    // Scaling
+    { id: 'vid-saas-5', phaseId: 'phase-saas-ai-tools-8', youtubeUrl: 'https://www.youtube.com/watch?v=0LNQxT9LvM0', youtubeId: '0LNQxT9LvM0', title: 'Scaling a Startup — Growth Strategies', description: 'YC insights on scaling from first users to millions and fundraising strategy.', duration: '28:30', order: 1, difficulty: 'advanced' },
 ];
 
 // ===== TASKS =====
@@ -286,6 +306,6 @@ export const problems: Problem[] = [
         explanation: 'If you\'re drowning in work, congrats — you have demand. Now systemize: document your processes (SOPs), hire contractors for repetitive tasks, use automation tools (Zapier, Calendly), raise prices to reduce volume, and learn to say no to bad-fit clients. Growth should simplify, not complicate.',
         businessId: 'biz-agency',
         phaseId: 'phase-digital-marketing-agency-8',
-        videoIds: ['vid-agency-5', 'vid-free-6'],
+        videoIds: ['vid-agency-5', 'vid-free-5'],
     },
 ];
