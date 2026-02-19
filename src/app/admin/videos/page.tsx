@@ -2,14 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { getBusinesses, getPhasesByBusiness, getVideosByPhase, createVideo, updateVideo, deleteVideo } from '@/lib/db';
+import { extractYouTubeId, getEmbedUrl, getThumbnailUrl } from '@/lib/youtube';
 import Modal from '@/components/Modal';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineArrowUp, HiOutlineArrowDown } from 'react-icons/hi';
 import type { Video } from '@/lib/seed-data';
-
-function extractYoutubeId(url: string): string {
-    const match = url.match(/(?:v=|\/embed\/|\/watch\?v=|youtu\.be\/)([^&\s?]+)/);
-    return match ? match[1] : '';
-}
 
 export default function AdminVideos() {
     const [refresh, setRefresh] = useState(0);
@@ -30,6 +26,14 @@ export default function AdminVideos() {
     const [editing, setEditing] = useState<Video | null>(null);
     const [form, setForm] = useState({ title: '', youtubeUrl: '', youtubeId: '', description: '', duration: '', order: 1, difficulty: 'beginner' as Video['difficulty'], phaseId: '' });
 
+    // Auto-extract video ID when URL changes
+    const handleUrlChange = (url: string) => {
+        const videoId = extractYouTubeId(url) || '';
+        setForm(prev => ({ ...prev, youtubeUrl: url, youtubeId: videoId }));
+    };
+
+    const previewId = form.youtubeId || extractYouTubeId(form.youtubeUrl) || '';
+
     const openCreate = () => {
         setEditing(null);
         setForm({ title: '', youtubeUrl: '', youtubeId: '', description: '', duration: '', order: videos.length + 1, difficulty: 'beginner', phaseId: selectedPhase });
@@ -44,7 +48,7 @@ export default function AdminVideos() {
 
     const handleSave = () => {
         if (!form.title || !form.youtubeUrl) return;
-        const youtubeId = extractYoutubeId(form.youtubeUrl);
+        const youtubeId = extractYouTubeId(form.youtubeUrl) || '';
         const data = { ...form, youtubeId };
         if (editing) {
             updateVideo(editing.id, data);
@@ -103,6 +107,7 @@ export default function AdminVideos() {
                     <thead>
                         <tr>
                             <th>#</th>
+                            <th>Preview</th>
                             <th>Title</th>
                             <th>Duration</th>
                             <th>Difficulty</th>
@@ -113,6 +118,13 @@ export default function AdminVideos() {
                         {videos.map((video) => (
                             <tr key={video.id}>
                                 <td>{video.order}</td>
+                                <td>
+                                    <img
+                                        src={getThumbnailUrl(video.youtubeId, 'default')}
+                                        alt=""
+                                        style={{ width: '80px', height: '45px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }}
+                                    />
+                                </td>
                                 <td className="font-medium">{video.title}</td>
                                 <td className="text-sm text-muted">{video.duration}</td>
                                 <td><span className="badge badge-accent">{video.difficulty}</span></td>
@@ -158,12 +170,38 @@ export default function AdminVideos() {
                 }
             >
                 <div className="form-group">
+                    <label className="form-label">YouTube URL</label>
+                    <input className="input" value={form.youtubeUrl} onChange={(e) => handleUrlChange(e.target.value)} placeholder="Paste any YouTube link — URL auto-parsed" />
+                    {previewId && (
+                        <p className="text-xs text-muted" style={{ marginTop: '4px' }}>
+                            ✅ Video ID: <code style={{ color: 'var(--accent-primary)' }}>{previewId}</code>
+                        </p>
+                    )}
+                    {form.youtubeUrl && !previewId && (
+                        <p className="text-xs" style={{ marginTop: '4px', color: 'var(--accent-danger)' }}>
+                            ⚠️ Could not extract video ID from this URL
+                        </p>
+                    )}
+                </div>
+
+                {/* Live preview */}
+                {previewId && (
+                    <div className="form-group">
+                        <label className="form-label">Preview</label>
+                        <div style={{ position: 'relative', paddingBottom: '56.25%', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
+                            <iframe
+                                src={getEmbedUrl(previewId)}
+                                title="Preview"
+                                allow="encrypted-media"
+                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="form-group">
                     <label className="form-label">Title</label>
                     <input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Video title" />
-                </div>
-                <div className="form-group">
-                    <label className="form-label">YouTube URL</label>
-                    <input className="input" value={form.youtubeUrl} onChange={(e) => setForm({ ...form, youtubeUrl: e.target.value })} placeholder="https://youtube.com/watch?v=..." />
                 </div>
                 <div className="form-group">
                     <label className="form-label">Description</label>

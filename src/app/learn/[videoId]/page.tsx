@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getVideoById, getPhaseById, getBusinessById, getTasksByPhase } from '@/lib/db';
-import { HiOutlineArrowLeft, HiOutlineClock, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineBookmark } from 'react-icons/hi';
+import { getEmbedUrl, getWatchUrl, getThumbnailUrl } from '@/lib/youtube';
+import { HiOutlineArrowLeft, HiOutlineClock, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineBookmark, HiOutlineExternalLink, HiOutlinePlay } from 'react-icons/hi';
 
 interface Note {
     id: string;
@@ -24,7 +25,8 @@ export default function LearnPage() {
     const [notes, setNotes] = useState<Note[]>([]);
     const [noteText, setNoteText] = useState('');
     const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
-    const playerRef = useRef<HTMLIFrameElement>(null);
+    const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
+    const [embedError, setEmbedError] = useState(false);
 
     // Load notes and task progress from localStorage
     useEffect(() => {
@@ -37,6 +39,10 @@ export default function LearnPage() {
 
             // Save as last watched
             localStorage.setItem('learnstart-last-video', videoId);
+
+            // Reset player state on video change
+            setIsPlayerLoaded(false);
+            setEmbedError(false);
         }
     }, [videoId]);
 
@@ -58,7 +64,7 @@ export default function LearnPage() {
         if (!noteText.trim()) return;
         const note: Note = {
             id: `note-${Date.now()}`,
-            timestamp: 0, // would come from YouTube API in production
+            timestamp: 0,
             text: noteText.trim(),
             createdAt: new Date().toISOString(),
         };
@@ -99,6 +105,10 @@ export default function LearnPage() {
         );
     }
 
+    const embedUrl = getEmbedUrl(video.youtubeId);
+    const watchUrl = getWatchUrl(video.youtubeId);
+    const thumbnailUrl = getThumbnailUrl(video.youtubeId, 'maxres');
+
     return (
         <div className="page-content">
             <div className="container">
@@ -121,19 +131,94 @@ export default function LearnPage() {
                 <div className="video-learn-layout" style={{ display: 'flex', gap: 'var(--space-lg)' }}>
                     {/* Main column */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        {/* Video player */}
+                        {/* Video player — lazy loaded with thumbnail click-to-play */}
                         <div className="video-container animate-fadeInUp">
-                            <iframe
-                                ref={playerRef}
-                                src={`https://www.youtube.com/embed/${video.youtubeId}?rel=0`}
-                                title={video.title}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
+                            {!isPlayerLoaded && !embedError ? (
+                                /* Thumbnail click-to-play — lazy loads iframe */
+                                <div
+                                    className="video-thumbnail"
+                                    onClick={() => setIsPlayerLoaded(true)}
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        cursor: 'pointer',
+                                        background: `url(${thumbnailUrl}) center/cover no-repeat`,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '72px',
+                                        height: '72px',
+                                        borderRadius: '50%',
+                                        background: 'rgba(0,0,0,0.7)',
+                                        backdropFilter: 'blur(8px)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'transform 0.2s ease',
+                                        border: '2px solid rgba(255,255,255,0.2)',
+                                    }}>
+                                        <HiOutlinePlay size={32} style={{ color: 'white', marginLeft: '4px' }} />
+                                    </div>
+                                </div>
+                            ) : embedError ? (
+                                /* Fallback — video can't be embedded */
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: 'var(--bg-secondary)',
+                                    gap: 'var(--space-md)',
+                                    padding: 'var(--space-xl)',
+                                    textAlign: 'center',
+                                }}>
+                                    <div style={{ fontSize: '48px' }}>🚫</div>
+                                    <p className="font-medium">This video cannot be embedded</p>
+                                    <p className="text-sm text-muted">The video owner has disabled embedding. Open it directly on YouTube.</p>
+                                    <a
+                                        href={watchUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-primary"
+                                        style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}
+                                    >
+                                        <HiOutlineExternalLink /> Open on YouTube
+                                    </a>
+                                </div>
+                            ) : (
+                                /* Iframe player */
+                                <iframe
+                                    src={embedUrl}
+                                    title={video.title}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                    loading="lazy"
+                                    onError={() => setEmbedError(true)}
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                />
+                            )}
+                        </div>
+
+                        {/* Open on YouTube button */}
+                        <div style={{ marginTop: 'var(--space-sm)', display: 'flex', justifyContent: 'flex-end' }}>
+                            <a
+                                href={watchUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-ghost btn-sm"
+                                style={{ display: 'inline-flex', gap: '4px', alignItems: 'center', fontSize: 'var(--font-size-xs)' }}
+                            >
+                                <HiOutlineExternalLink size={12} /> Open on YouTube
+                            </a>
                         </div>
 
                         {/* Video info */}
-                        <div style={{ marginTop: 'var(--space-lg)' }}>
+                        <div style={{ marginTop: 'var(--space-md)' }}>
                             <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '-0.02em' }}>
                                 {video.title}
                             </h1>
