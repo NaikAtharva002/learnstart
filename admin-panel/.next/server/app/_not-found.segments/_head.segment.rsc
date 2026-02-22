@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[97367,["/_next/static/chunks/59a2e402f2751c0a.js","/_next/static/chunks/d2be314c3ece3fbe.js","/_next/static/chunks/9811a1355034818b.js","/_next/static/chunks/e60190d73b8b7e51.js"],"ViewportBoundary"]
+3:I[97367,["/_next/static/chunks/59a2e402f2751c0a.js","/_next/static/chunks/d2be314c3ece3fbe.js","/_next/static/chunks/9811a1355034818b.js","/_next/static/chunks/e60190d73b8b7e51.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"Taz9d2laiIvu9v51AthR6","rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"LearnStart Admin — Content Management"}],["$","meta","1",{"name":"description","content":"Manage your roadmap content, videos, and tasks."}]]}]}]}],null]}],"loading":null,"isPartial":false}

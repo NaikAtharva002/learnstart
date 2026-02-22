@@ -1,21 +1,53 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getProblemById, getVideosByIds, getPhaseById, getBusinessById, getTasksByPhase } from '@/lib/db';
 import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineClock, HiOutlineCheck, HiOutlineArrowRight } from 'react-icons/hi';
+import type { Problem, Video, Phase, Business, Task } from '@/lib/seed-data';
 
 export default function ProblemDetailPage() {
     const params = useParams();
     const problemId = params.id as string;
-    const problem = useMemo(() => getProblemById(problemId), [problemId]);
-    const linkedVideos = useMemo(() => problem ? getVideosByIds(problem.videoIds) : [], [problem]);
-    const phase = useMemo(() => problem ? getPhaseById(problem.phaseId) : undefined, [problem]);
-    const business = useMemo(() => problem ? getBusinessById(problem.businessId) : undefined, [problem]);
-    const phaseTasks = useMemo(() => phase ? getTasksByPhase(phase.id) : [], [phase]);
+
+    const [problem, setProblem] = useState<Problem | null>(null);
+    const [linkedVideos, setLinkedVideos] = useState<Video[]>([]);
+    const [phase, setPhase] = useState<Phase | null>(null);
+    const [business, setBusiness] = useState<Business | null>(null);
+    const [phaseTasks, setPhaseTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        setLoading(true);
+        getProblemById(problemId).then(prob => {
+            setProblem(prob || null);
+            if (prob) {
+                Promise.all([
+                    getVideosByIds(prob.videoIds),
+                    getPhaseById(prob.phaseId),
+                    getBusinessById(prob.businessId)
+                ]).then(([vids, phs, biz]) => {
+                    setLinkedVideos(vids);
+                    setPhase(phs || null);
+                    setBusiness(biz || null);
+
+                    if (phs) {
+                        getTasksByPhase(phs.id).then(tasks => {
+                            setPhaseTasks(tasks);
+                            setLoading(false);
+                        });
+                    } else {
+                        setLoading(false);
+                    }
+                });
+            } else {
+                setLoading(false);
+            }
+        });
+    }, [problemId]);
 
     const toggleTask = (taskId: string) => {
         setCompletedTasks(prev => {
@@ -25,6 +57,14 @@ export default function ProblemDetailPage() {
             return next;
         });
     };
+
+    if (loading) {
+        return (
+            <div className="page-content flex items-center justify-center min-h-[50vh]">
+                <div className="text-muted">Loading problem details...</div>
+            </div>
+        );
+    }
 
     if (!problem) {
         return (

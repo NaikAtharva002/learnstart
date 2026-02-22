@@ -1,16 +1,33 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { getBusinesses, getPhasesByBusiness, createPhase, updatePhase, deletePhase } from '@/lib/db';
 import Modal from '@/components/Modal';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineArrowUp, HiOutlineArrowDown } from 'react-icons/hi';
-import type { Phase } from '@/lib/seed-data';
+import type { Phase, Business } from '@/lib/seed-data';
 
 export default function AdminPhases() {
     const [refresh, setRefresh] = useState(0);
-    const businesses = useMemo(() => getBusinesses(), [refresh]);
-    const [selectedBiz, setSelectedBiz] = useState(businesses[0]?.id || '');
-    const phases = useMemo(() => selectedBiz ? getPhasesByBusiness(selectedBiz) : [], [selectedBiz, refresh]);
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [selectedBiz, setSelectedBiz] = useState('');
+    const [phases, setPhases] = useState<Phase[]>([]);
+
+    useEffect(() => {
+        getBusinesses().then(bizs => {
+            setBusinesses(bizs);
+            if (bizs.length > 0 && !selectedBiz) {
+                setSelectedBiz(bizs[0].id);
+            }
+        });
+    }, [refresh, selectedBiz]);
+
+    useEffect(() => {
+        if (selectedBiz) {
+            getPhasesByBusiness(selectedBiz).then(setPhases);
+        } else {
+            setPhases([]);
+        }
+    }, [selectedBiz, refresh]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Phase | null>(null);
@@ -28,30 +45,30 @@ export default function AdminPhases() {
         setModalOpen(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!form.name || !form.businessId) return;
         if (editing) {
-            updatePhase(editing.id, form);
+            await updatePhase(editing.id, form);
         } else {
-            createPhase(form);
+            await createPhase(form);
         }
         setModalOpen(false);
         setRefresh(r => r + 1);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('Delete this phase?')) {
-            deletePhase(id);
+            await deletePhase(id);
             setRefresh(r => r + 1);
         }
     };
 
-    const movePhase = (phase: Phase, direction: 'up' | 'down') => {
+    const movePhase = async (phase: Phase, direction: 'up' | 'down') => {
         const newOrder = direction === 'up' ? phase.order - 1 : phase.order + 1;
         const swap = phases.find(p => p.order === newOrder);
         if (swap) {
-            updatePhase(swap.id, { order: phase.order });
-            updatePhase(phase.id, { order: newOrder });
+            await updatePhase(swap.id, { order: phase.order });
+            await updatePhase(phase.id, { order: newOrder });
             setRefresh(r => r + 1);
         }
     };
@@ -119,6 +136,16 @@ export default function AdminPhases() {
                     </tbody>
                 </table>
             </div>
+
+            {phases.length === 0 && (
+                <div className="empty-state">
+                    <div className="empty-state-icon">🚩</div>
+                    <p className="empty-state-title">No phases found</p>
+                    {selectedBiz && (
+                        <button className="btn btn-primary mt-md" onClick={openCreate}>Create the first phase</button>
+                    )}
+                </div>
+            )}
 
             <Modal
                 isOpen={modalOpen}

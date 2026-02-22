@@ -1,17 +1,38 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { getProblems, getBusinesses, getVideosByIds, getPhaseById, getBusinessById } from '@/lib/db';
+import { getProblems, getBusinesses, getAllVideos, getAllPhases } from '@/lib/db';
 import { HiOutlineSearch, HiOutlineLightningBolt, HiOutlineArrowRight, HiOutlineFilter } from 'react-icons/hi';
+import type { Business, Problem, Phase, Video } from '@/lib/seed-data';
 
 export default function ProblemsPage() {
     const [query, setQuery] = useState('');
     const [selectedBusiness, setSelectedBusiness] = useState('');
-    const businesses = useMemo(() => getBusinesses(), []);
+
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [allProblems, setAllProblems] = useState<Problem[]>([]);
+    const [phases, setPhases] = useState<Phase[]>([]);
+    const [videos, setVideos] = useState<Video[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([
+            getBusinesses(),
+            getProblems(),
+            getAllPhases(),
+            getAllVideos()
+        ]).then(([bizs, probs, phs, vids]) => {
+            setBusinesses(bizs);
+            setAllProblems(probs);
+            setPhases(phs);
+            setVideos(vids);
+            setLoading(false);
+        });
+    }, []);
 
     const problems = useMemo(() => {
-        let results = getProblems();
+        let results = allProblems;
         if (selectedBusiness) {
             results = results.filter((p) => p.businessId === selectedBusiness);
         }
@@ -22,7 +43,15 @@ export default function ProblemsPage() {
             );
         }
         return results;
-    }, [query, selectedBusiness]);
+    }, [query, selectedBusiness, allProblems]);
+
+    if (loading) {
+        return (
+            <div className="page-content flex items-center justify-center min-h-[50vh]">
+                <div className="text-muted">Loading problems library...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="page-content">
@@ -72,9 +101,9 @@ export default function ProblemsPage() {
                 {/* Problem Grid */}
                 <div className="grid-2">
                     {problems.map((problem, i) => {
-                        const phase = getPhaseById(problem.phaseId);
-                        const biz = getBusinessById(problem.businessId);
-                        const linkedVideos = getVideosByIds(problem.videoIds);
+                        const phase = phases.find(p => p.id === problem.phaseId);
+                        const biz = businesses.find(b => b.id === problem.businessId);
+                        const linkedVideos = videos.filter(v => problem.videoIds.includes(v.id));
 
                         return (
                             <Link href={`/problems/${problem.id}`} key={problem.id}>

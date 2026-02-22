@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { getCategories, createCategory, updateCategory, deleteCategory } from '@/lib/db';
 import Modal from '@/components/Modal';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
@@ -8,10 +8,14 @@ import type { Category } from '@/lib/seed-data';
 
 export default function AdminCategories() {
     const [refresh, setRefresh] = useState(0);
-    const categories = useMemo(() => getCategories(), [refresh]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Category | null>(null);
     const [form, setForm] = useState({ name: '', icon: '📁', image: '', order: 1 });
+
+    useEffect(() => {
+        getCategories().then(setCategories);
+    }, [refresh]);
 
     const openCreate = () => {
         setEditing(null);
@@ -25,20 +29,20 @@ export default function AdminCategories() {
         setModalOpen(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!form.name) return;
         if (editing) {
-            updateCategory(editing.id, form);
+            await updateCategory(editing.id, form);
         } else {
-            createCategory(form);
+            await createCategory(form);
         }
         setModalOpen(false);
         setRefresh(r => r + 1);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('Delete this category? Businesses in it will lose their category.')) {
-            deleteCategory(id);
+            await deleteCategory(id);
             setRefresh(r => r + 1);
         }
     };

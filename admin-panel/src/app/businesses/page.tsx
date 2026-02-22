@@ -1,16 +1,23 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { getBusinesses, getCategories, createBusiness, updateBusiness, deleteBusiness, getCategoryById } from '@/lib/db';
+import { useState, useEffect, useMemo } from 'react';
+import { getBusinesses, getCategories, createBusiness, updateBusiness, deleteBusiness } from '@/lib/db';
 import Modal from '@/components/Modal';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
-import type { Business } from '@/lib/seed-data';
+import type { Business, Category } from '@/lib/seed-data';
 
 export default function AdminBusinesses() {
     const [refresh, setRefresh] = useState(0);
-    const businesses = useMemo(() => getBusinesses(), [refresh]);
-    const categories = useMemo(() => getCategories(), [refresh]);
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [filterCat, setFilterCat] = useState('');
+
+    useEffect(() => {
+        Promise.all([getBusinesses(), getCategories()]).then(([bizs, cats]) => {
+            setBusinesses(bizs);
+            setCategories(cats);
+        });
+    }, [refresh]);
 
     const filtered = useMemo(() => {
         if (!filterCat) return businesses;
@@ -33,20 +40,20 @@ export default function AdminBusinesses() {
         setModalOpen(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!form.name || !form.slug || !form.categoryId) return;
         if (editing) {
-            updateBusiness(editing.id, form);
+            await updateBusiness(editing.id, form);
         } else {
-            createBusiness(form);
+            await createBusiness(form);
         }
         setModalOpen(false);
         setRefresh(r => r + 1);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('Delete this business and all its content?')) {
-            deleteBusiness(id);
+            await deleteBusiness(id);
             setRefresh(r => r + 1);
         }
     };
@@ -92,7 +99,7 @@ export default function AdminBusinesses() {
                     </thead>
                     <tbody>
                         {filtered.map((biz) => {
-                            const cat = getCategoryById(biz.categoryId);
+                            const cat = categories.find(c => c.id === biz.categoryId);
                             return (
                                 <tr key={biz.id}>
                                     <td>{biz.order}</td>
@@ -121,7 +128,9 @@ export default function AdminBusinesses() {
                 <div className="empty-state">
                     <div className="empty-state-icon">📦</div>
                     <p className="empty-state-title">No businesses found</p>
-                    <button className="btn btn-primary mt-md" onClick={openCreate}>Create your first business</button>
+                    {filterCat === '' && (
+                        <button className="btn btn-primary mt-md" onClick={openCreate}>Create your first business</button>
+                    )}
                 </div>
             )}
 

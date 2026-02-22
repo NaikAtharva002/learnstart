@@ -1,21 +1,55 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getBusinessBySlug, getPhasesByBusiness, getVideosByPhase, getTasksByPhase } from '@/lib/db';
 import { HiOutlinePlay, HiOutlineCheck, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowLeft, HiOutlineClock } from 'react-icons/hi';
+import type { Business, Phase, Video, Task } from '@/lib/seed-data';
 
 export default function RoadmapPage() {
     const params = useParams();
     const slug = params.slug as string;
-    const business = useMemo(() => getBusinessBySlug(slug), [slug]);
-    const phases = useMemo(() => business ? getPhasesByBusiness(business.id) : [], [business]);
 
-    const [expandedPhase, setExpandedPhase] = useState<string | null>(phases[0]?.id || null);
+    const [business, setBusiness] = useState<Business | null>(null);
+    const [phases, setPhases] = useState<Phase[]>([]);
+    const [videos, setVideos] = useState<Video[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
     const [completedPhases, setCompletedPhases] = useState<Set<string>>(new Set());
     const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        setLoading(true);
+        getBusinessBySlug(slug).then(biz => {
+            setBusiness(biz || null);
+            if (biz) {
+                getPhasesByBusiness(biz.id).then(phs => {
+                    setPhases(phs);
+                    setExpandedPhase(phs[0]?.id || null);
+                    if (phs.length > 0) {
+                        Promise.all([
+                            ...phs.map(p => getVideosByPhase(p.id)),
+                            ...phs.map(p => getTasksByPhase(p.id))
+                        ]).then(results => {
+                            const vids = results.slice(0, phs.length).flat() as Video[];
+                            const tsks = results.slice(phs.length).flat() as Task[];
+                            setVideos(vids);
+                            setTasks(tsks);
+                            setLoading(false);
+                        });
+                    } else {
+                        setLoading(false);
+                    }
+                });
+            } else {
+                setLoading(false);
+            }
+        });
+    }, [slug]);
 
     // Load progress from localStorage
     useEffect(() => {
@@ -61,6 +95,14 @@ export default function RoadmapPage() {
         });
     };
 
+    if (loading) {
+        return (
+            <div className="page-content flex items-center justify-center min-h-[50vh]">
+                <div className="text-muted">Loading roadmap details...</div>
+            </div>
+        );
+    }
+
     if (!business) {
         return (
             <div className="page-content">
@@ -90,7 +132,7 @@ export default function RoadmapPage() {
                 {/* Hero banner */}
                 <div className="animate-fadeInUp" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', position: 'relative', height: '180px', marginBottom: 'var(--space-lg)' }}>
                     <Image
-                        src={business.image}
+                        src={business.image || ''}
                         alt={business.name}
                         fill
                         style={{ objectFit: 'cover', opacity: 0.35 }}
@@ -125,8 +167,8 @@ export default function RoadmapPage() {
                 {/* Timeline */}
                 <div className="timeline">
                     {phases.map((phase, index) => {
-                        const phaseVideos = getVideosByPhase(phase.id);
-                        const phaseTasks = getTasksByPhase(phase.id);
+                        const phaseVideos = videos.filter(v => v.phaseId === phase.id);
+                        const phaseTasks = tasks.filter(t => t.phaseId === phase.id);
                         const isExpanded = expandedPhase === phase.id;
                         const isCompleted = completedPhases.has(phase.id);
                         const completedTaskCount = phaseTasks.filter(t => completedTasks.has(t.id)).length;

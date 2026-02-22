@@ -1,25 +1,52 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { getProblems, getBusinesses, getPhasesByBusiness, getAllVideos, createProblem, updateProblem, deleteProblem, getPhaseById, getBusinessById } from '@/lib/db';
+import { useState, useEffect, useMemo } from 'react';
+import { getProblems, getBusinesses, getPhasesByBusiness, getAllVideos, createProblem, updateProblem, deleteProblem } from '@/lib/db';
 import Modal from '@/components/Modal';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
-import type { Problem } from '@/lib/seed-data';
+import type { Problem, Business, Video, Phase } from '@/lib/seed-data';
 
 export default function AdminProblems() {
     const [refresh, setRefresh] = useState(0);
-    const problems = useMemo(() => getProblems(), [refresh]);
-    const businesses = useMemo(() => getBusinesses(), [refresh]);
-    const allVideos = useMemo(() => getAllVideos(), [refresh]);
+    const [problems, setProblems] = useState<Problem[]>([]);
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [allVideos, setAllVideos] = useState<Video[]>([]);
+
+    // Specifically load phases when businesses are selected in the form
+    const [allPhasesMap, setAllPhasesMap] = useState<Record<string, Phase>>({});
+
+    useEffect(() => {
+        Promise.all([
+            getProblems(),
+            getBusinesses(),
+            getAllVideos(),
+        ]).then(([probs, bizs, vids]) => {
+            setProblems(probs);
+            setBusinesses(bizs);
+            setAllVideos(vids);
+
+            // Just populate all phases mapped by business efficiently by making fetch request or fetching all phases
+            // actually it's easier to just fetch them inside mapped iteration or pre-fetch them all
+            Promise.all(bizs.map(b => getPhasesByBusiness(b.id))).then(results => {
+                const map: Record<string, Phase> = {};
+                results.flat().forEach(p => { map[p.id] = p; });
+                setAllPhasesMap(map);
+            });
+        });
+    }, [refresh]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Problem | null>(null);
     const [form, setForm] = useState({ title: '', explanation: '', businessId: '', phaseId: '', videoIds: [] as string[] });
 
-    const formPhases = useMemo(
-        () => form.businessId ? getPhasesByBusiness(form.businessId) : [],
-        [form.businessId, refresh]
-    );
+    const [formPhases, setFormPhases] = useState<Phase[]>([]);
+    useEffect(() => {
+        if (form.businessId) {
+            getPhasesByBusiness(form.businessId).then(setFormPhases);
+        } else {
+            setFormPhases([]);
+        }
+    }, [form.businessId]);
 
     const openCreate = () => {
         setEditing(null);
@@ -33,20 +60,20 @@ export default function AdminProblems() {
         setModalOpen(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!form.title || !form.businessId) return;
         if (editing) {
-            updateProblem(editing.id, form);
+            await updateProblem(editing.id, form);
         } else {
-            createProblem(form);
+            await createProblem(form);
         }
         setModalOpen(false);
         setRefresh(r => r + 1);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('Delete this problem?')) {
-            deleteProblem(id);
+            await deleteProblem(id);
             setRefresh(r => r + 1);
         }
     };
@@ -85,8 +112,8 @@ export default function AdminProblems() {
                     </thead>
                     <tbody>
                         {problems.map((problem) => {
-                            const biz = getBusinessById(problem.businessId);
-                            const phase = getPhaseById(problem.phaseId);
+                            const biz = businesses.find(b => b.id === problem.businessId);
+                            const phase = allPhasesMap[problem.phaseId];
                             return (
                                 <tr key={problem.id}>
                                     <td className="font-medium">{problem.title}</td>

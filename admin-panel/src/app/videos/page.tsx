@@ -1,26 +1,52 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getBusinesses, getPhasesByBusiness, getVideosByPhase, createVideo, updateVideo, deleteVideo } from '@/lib/db';
 import { extractYouTubeId, getEmbedUrl, getThumbnailUrl } from '@/lib/youtube';
 import Modal from '@/components/Modal';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineArrowUp, HiOutlineArrowDown } from 'react-icons/hi';
-import type { Video } from '@/lib/seed-data';
+import type { Video, Business, Phase } from '@/lib/seed-data';
 
 export default function AdminVideos() {
     const [refresh, setRefresh] = useState(0);
-    const businesses = useMemo(() => getBusinesses(), [refresh]);
-    const [selectedBiz, setSelectedBiz] = useState(businesses[0]?.id || '');
-    const phases = useMemo(() => selectedBiz ? getPhasesByBusiness(selectedBiz) : [], [selectedBiz, refresh]);
-    const [selectedPhase, setSelectedPhase] = useState(phases[0]?.id || '');
-    const videos = useMemo(() => selectedPhase ? getVideosByPhase(selectedPhase) : [], [selectedPhase, refresh]);
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [selectedBiz, setSelectedBiz] = useState('');
+    const [phases, setPhases] = useState<Phase[]>([]);
+    const [selectedPhase, setSelectedPhase] = useState('');
+    const [videos, setVideos] = useState<Video[]>([]);
 
-    // Update selected phase when business changes
-    useMemo(() => {
-        if (phases.length > 0 && !phases.find(p => p.id === selectedPhase)) {
-            setSelectedPhase(phases[0].id);
+    useEffect(() => {
+        getBusinesses().then(bizs => {
+            setBusinesses(bizs);
+            if (bizs.length > 0 && !selectedBiz) {
+                setSelectedBiz(bizs[0].id);
+            }
+        });
+    }, [refresh, selectedBiz]);
+
+    useEffect(() => {
+        if (selectedBiz) {
+            getPhasesByBusiness(selectedBiz).then(phs => {
+                setPhases(phs);
+                if (phs.length > 0 && !phs.find(p => p.id === selectedPhase)) {
+                    setSelectedPhase(phs[0].id);
+                } else if (phs.length === 0) {
+                    setSelectedPhase('');
+                }
+            });
+        } else {
+            setPhases([]);
+            setSelectedPhase('');
         }
-    }, [phases, selectedPhase]);
+    }, [selectedBiz, refresh, selectedPhase]);
+
+    useEffect(() => {
+        if (selectedPhase) {
+            getVideosByPhase(selectedPhase).then(setVideos);
+        } else {
+            setVideos([]);
+        }
+    }, [selectedPhase, refresh]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Video | null>(null);
@@ -46,32 +72,32 @@ export default function AdminVideos() {
         setModalOpen(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!form.title || !form.youtubeUrl) return;
         const youtubeId = extractYouTubeId(form.youtubeUrl) || '';
         const data = { ...form, youtubeId };
         if (editing) {
-            updateVideo(editing.id, data);
+            await updateVideo(editing.id, data);
         } else {
-            createVideo(data);
+            await createVideo(data);
         }
         setModalOpen(false);
         setRefresh(r => r + 1);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('Delete this video?')) {
-            deleteVideo(id);
+            await deleteVideo(id);
             setRefresh(r => r + 1);
         }
     };
 
-    const moveVideo = (video: Video, direction: 'up' | 'down') => {
+    const moveVideo = async (video: Video, direction: 'up' | 'down') => {
         const newOrder = direction === 'up' ? video.order - 1 : video.order + 1;
         const swap = videos.find(v => v.order === newOrder);
         if (swap) {
-            updateVideo(swap.id, { order: video.order });
-            updateVideo(video.id, { order: newOrder });
+            await updateVideo(swap.id, { order: video.order });
+            await updateVideo(video.id, { order: newOrder });
             setRefresh(r => r + 1);
         }
     };
@@ -83,7 +109,7 @@ export default function AdminVideos() {
                     <h1 className="section-title">Videos</h1>
                     <p className="section-subtitle">Manage YouTube videos for each phase</p>
                 </div>
-                <button className="btn btn-primary" onClick={openCreate}>
+                <button className="btn btn-primary" onClick={openCreate} disabled={!selectedPhase}>
                     <HiOutlinePlus /> Add Video
                 </button>
             </div>
@@ -91,11 +117,13 @@ export default function AdminVideos() {
             {/* Filters */}
             <div className="flex gap-md mb-lg" style={{ flexWrap: 'wrap' }}>
                 <select className="input select" value={selectedBiz} onChange={(e) => setSelectedBiz(e.target.value)} style={{ width: 'auto', minWidth: '180px' }}>
+                    <option value="">Select Business...</option>
                     {businesses.map((b) => (
                         <option key={b.id} value={b.id}>{b.icon} {b.name}</option>
                     ))}
                 </select>
                 <select className="input select" value={selectedPhase} onChange={(e) => setSelectedPhase(e.target.value)} style={{ width: 'auto', minWidth: '180px' }}>
+                    <option value="">Select Phase...</option>
                     {phases.map((p) => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
@@ -154,7 +182,9 @@ export default function AdminVideos() {
                 <div className="empty-state">
                     <div className="empty-state-icon">🎬</div>
                     <p className="empty-state-title">No videos in this phase</p>
-                    <button className="btn btn-primary mt-md" onClick={openCreate}>Add first video</button>
+                    {selectedPhase && (
+                        <button className="btn btn-primary mt-md" onClick={openCreate}>Add first video</button>
+                    )}
                 </div>
             )}
 

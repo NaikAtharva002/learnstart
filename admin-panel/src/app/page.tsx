@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { getBusinesses, getProblems, getCategories, getAllVideos, getAllPhases } from '@/lib/db';
 import { tasks } from '@/lib/seed-data';
 import { motion } from 'framer-motion';
@@ -16,12 +16,28 @@ import {
 } from 'react-icons/hi';
 
 export default function AdminDashboard() {
-    const catCount = useMemo(() => getCategories().length, []);
-    const businessCount = useMemo(() => getBusinesses().length, []);
-    const phaseCount = useMemo(() => getAllPhases().length, []);
-    const videoCount = useMemo(() => getAllVideos().length, []);
+    const [catCount, setCatCount] = useState(0);
+    const [businessCount, setBusinessCount] = useState(0);
+    const [phaseCount, setPhaseCount] = useState(0);
+    const [videoCount, setVideoCount] = useState(0);
+    const [problemCount, setProblemCount] = useState(0);
     const taskCount = tasks.length;
-    const problemCount = useMemo(() => getProblems().length, []);
+
+    useEffect(() => {
+        Promise.all([
+            getCategories(),
+            getBusinesses(),
+            getAllPhases(),
+            getAllVideos(),
+            getProblems()
+        ]).then(([cats, bizs, phs, vids, probs]) => {
+            setCatCount(cats.length);
+            setBusinessCount(bizs.length);
+            setPhaseCount(phs.length);
+            setVideoCount(vids.length);
+            setProblemCount(probs.length);
+        });
+    }, []);
 
     const stats = [
         { label: 'Categories', value: catCount, icon: <HiOutlineCollection />, color: '#f59e0b', trend: '+2 this month' },

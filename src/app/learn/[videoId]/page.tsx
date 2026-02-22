@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getVideoById, getPhaseById, getBusinessById, getTasksByPhase } from '@/lib/db';
 import { getEmbedUrl, getWatchUrl, getThumbnailUrl } from '@/lib/youtube';
 import { HiOutlineArrowLeft, HiOutlineClock, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck, HiOutlineBookmark, HiOutlineExternalLink, HiOutlinePlay } from 'react-icons/hi';
+import type { Video, Phase, Business, Task } from '@/lib/seed-data';
 
 interface Note {
     id: string;
@@ -17,16 +18,44 @@ interface Note {
 export default function LearnPage() {
     const params = useParams();
     const videoId = params.videoId as string;
-    const video = useMemo(() => getVideoById(videoId), [videoId]);
-    const phase = useMemo(() => video ? getPhaseById(video.phaseId) : undefined, [video]);
-    const business = useMemo(() => phase ? getBusinessById(phase.businessId) : undefined, [phase]);
-    const phaseTasks = useMemo(() => phase ? getTasksByPhase(phase.id) : [], [phase]);
+
+    const [video, setVideo] = useState<Video | null>(null);
+    const [phase, setPhase] = useState<Phase | null>(null);
+    const [business, setBusiness] = useState<Business | null>(null);
+    const [phaseTasks, setPhaseTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [notes, setNotes] = useState<Note[]>([]);
     const [noteText, setNoteText] = useState('');
     const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
     const [isPlayerLoaded, setIsPlayerLoaded] = useState(false);
     const [embedError, setEmbedError] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        getVideoById(videoId).then(vid => {
+            setVideo(vid || null);
+            if (vid) {
+                getPhaseById(vid.phaseId).then(phs => {
+                    setPhase(phs || null);
+                    if (phs) {
+                        Promise.all([
+                            getBusinessById(phs.businessId),
+                            getTasksByPhase(phs.id)
+                        ]).then(([biz, tasks]) => {
+                            setBusiness(biz || null);
+                            setPhaseTasks(tasks);
+                            setLoading(false);
+                        });
+                    } else {
+                        setLoading(false);
+                    }
+                });
+            } else {
+                setLoading(false);
+            }
+        });
+    }, [videoId]);
 
     // Load notes and task progress from localStorage
     useEffect(() => {
@@ -90,6 +119,14 @@ export default function LearnPage() {
         const s = seconds % 60;
         return `${m}:${s.toString().padStart(2, '0')}`;
     };
+
+    if (loading) {
+        return (
+            <div className="page-content flex items-center justify-center min-h-[50vh]">
+                <div className="text-muted">Loading learning material...</div>
+            </div>
+        );
+    }
 
     if (!video) {
         return (

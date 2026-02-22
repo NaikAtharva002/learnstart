@@ -1,24 +1,51 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { getBusinesses, getPhasesByBusiness, getTasksByPhase, createTask, updateTask, deleteTask } from '@/lib/db';
 import Modal from '@/components/Modal';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
-import type { Task } from '@/lib/seed-data';
+import type { Task, Business, Phase } from '@/lib/seed-data';
 
 export default function AdminTasks() {
     const [refresh, setRefresh] = useState(0);
-    const businesses = useMemo(() => getBusinesses(), [refresh]);
-    const [selectedBiz, setSelectedBiz] = useState(businesses[0]?.id || '');
-    const phases = useMemo(() => selectedBiz ? getPhasesByBusiness(selectedBiz) : [], [selectedBiz, refresh]);
-    const [selectedPhase, setSelectedPhase] = useState(phases[0]?.id || '');
-    const tasks = useMemo(() => selectedPhase ? getTasksByPhase(selectedPhase) : [], [selectedPhase, refresh]);
+    const [businesses, setBusinesses] = useState<Business[]>([]);
+    const [selectedBiz, setSelectedBiz] = useState('');
+    const [phases, setPhases] = useState<Phase[]>([]);
+    const [selectedPhase, setSelectedPhase] = useState('');
+    const [tasks, setTasks] = useState<Task[]>([]);
 
-    useMemo(() => {
-        if (phases.length > 0 && !phases.find(p => p.id === selectedPhase)) {
-            setSelectedPhase(phases[0].id);
+    useEffect(() => {
+        getBusinesses().then(bizs => {
+            setBusinesses(bizs);
+            if (bizs.length > 0 && !selectedBiz) {
+                setSelectedBiz(bizs[0].id);
+            }
+        });
+    }, [refresh, selectedBiz]);
+
+    useEffect(() => {
+        if (selectedBiz) {
+            getPhasesByBusiness(selectedBiz).then(phs => {
+                setPhases(phs);
+                if (phs.length > 0 && !phs.find(p => p.id === selectedPhase)) {
+                    setSelectedPhase(phs[0].id);
+                } else if (phs.length === 0) {
+                    setSelectedPhase('');
+                }
+            });
+        } else {
+            setPhases([]);
+            setSelectedPhase('');
         }
-    }, [phases, selectedPhase]);
+    }, [selectedBiz, refresh, selectedPhase]);
+
+    useEffect(() => {
+        if (selectedPhase) {
+            getTasksByPhase(selectedPhase).then(setTasks);
+        } else {
+            setTasks([]);
+        }
+    }, [selectedPhase, refresh]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Task | null>(null);
@@ -36,20 +63,20 @@ export default function AdminTasks() {
         setModalOpen(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!form.title) return;
         if (editing) {
-            updateTask(editing.id, form);
+            await updateTask(editing.id, form);
         } else {
-            createTask(form);
+            await createTask(form);
         }
         setModalOpen(false);
         setRefresh(r => r + 1);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('Delete this task?')) {
-            deleteTask(id);
+            await deleteTask(id);
             setRefresh(r => r + 1);
         }
     };
@@ -61,18 +88,20 @@ export default function AdminTasks() {
                     <h1 className="section-title">Tasks</h1>
                     <p className="section-subtitle">Manage action tasks for each phase</p>
                 </div>
-                <button className="btn btn-primary" onClick={openCreate}>
+                <button className="btn btn-primary" onClick={openCreate} disabled={!selectedPhase}>
                     <HiOutlinePlus /> Add Task
                 </button>
             </div>
 
             <div className="flex gap-md mb-lg" style={{ flexWrap: 'wrap' }}>
                 <select className="input select" value={selectedBiz} onChange={(e) => setSelectedBiz(e.target.value)} style={{ width: 'auto', minWidth: '180px' }}>
+                    <option value="">Select Business...</option>
                     {businesses.map((b) => (
                         <option key={b.id} value={b.id}>{b.icon} {b.name}</option>
                     ))}
                 </select>
                 <select className="input select" value={selectedPhase} onChange={(e) => setSelectedPhase(e.target.value)} style={{ width: 'auto', minWidth: '180px' }}>
+                    <option value="">Select Phase...</option>
                     {phases.map((p) => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
@@ -115,7 +144,9 @@ export default function AdminTasks() {
                 <div className="empty-state">
                     <div className="empty-state-icon">✅</div>
                     <p className="empty-state-title">No tasks in this phase</p>
-                    <button className="btn btn-primary mt-md" onClick={openCreate}>Add first task</button>
+                    {selectedPhase && (
+                        <button className="btn btn-primary mt-md" onClick={openCreate}>Add first task</button>
+                    )}
                 </div>
             )}
 

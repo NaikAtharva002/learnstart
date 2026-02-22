@@ -1,16 +1,51 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCategories, getBusinessesByCategory, searchBusinesses, getVideosByPhase, getPhasesByBusiness } from '@/lib/db';
+import { getCategories, getBusinesses, getAllPhases, getAllVideos, searchBusinesses } from '@/lib/db';
 import { HiOutlineSearch, HiOutlineArrowRight, HiOutlinePlay, HiOutlineFlag } from 'react-icons/hi';
-import type { Business } from '@/lib/seed-data';
+import type { Business, Category, Phase, Video } from '@/lib/seed-data';
 
 export default function HomePage() {
   const [query, setQuery] = useState('');
-  const categories = useMemo(() => getCategories(), []);
-  const searchResults = useMemo(() => query ? searchBusinesses(query) : null, [query]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [allBusinesses, setAllBusinesses] = useState<Business[]>([]);
+  const [phases, setPhases] = useState<Phase[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [searchResults, setSearchResults] = useState<Business[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      getCategories(),
+      getBusinesses(),
+      getAllPhases(),
+      getAllVideos()
+    ]).then(([cats, bizs, phs, vids]) => {
+      setCategories(cats);
+      setAllBusinesses(bizs);
+      setPhases(phs);
+      setVideos(vids);
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (query) {
+      searchBusinesses(query).then(setSearchResults);
+    } else {
+      setSearchResults(null);
+    }
+  }, [query]);
+
+  if (loading) {
+    return (
+      <div className="page-content flex items-center justify-center min-h-[50vh]">
+        <div className="text-muted">Loading available roadmaps...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-content">
@@ -58,7 +93,7 @@ export default function HomePage() {
             <input
               className="input"
               type="text"
-              placeholder="Search 31 business roadmaps..."
+              placeholder="Search business roadmaps..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{ paddingLeft: '42px', fontSize: 'var(--font-size-base)' }}
@@ -82,7 +117,7 @@ export default function HomePage() {
             </div>
             <div className="grid-4">
               {searchResults.map((biz, i) => (
-                <BusinessCard key={biz.id} biz={biz} delay={i} />
+                <BusinessCard key={biz.id} biz={biz} delay={i} phases={phases} videos={videos} />
               ))}
             </div>
             {searchResults.length === 0 && (
@@ -97,7 +132,7 @@ export default function HomePage() {
 
         {/* Category Sections */}
         {!searchResults && categories.map((cat) => {
-          const catBusinesses = getBusinessesByCategory(cat.id);
+          const catBusinesses = allBusinesses.filter(b => b.categoryId === cat.id);
           if (catBusinesses.length === 0) return null;
 
           return (
@@ -148,7 +183,7 @@ export default function HomePage() {
 
               <div className="grid-4">
                 {catBusinesses.map((biz, i) => (
-                  <BusinessCard key={biz.id} biz={biz} delay={i} />
+                  <BusinessCard key={biz.id} biz={biz} delay={i} phases={phases} videos={videos} />
                 ))}
               </div>
             </section>
@@ -175,9 +210,9 @@ export default function HomePage() {
 }
 
 // Business card with cover image
-function BusinessCard({ biz, delay }: { biz: Business; delay: number }) {
-  const phases = getPhasesByBusiness(biz.id);
-  const videoCount = phases.reduce((sum, p) => sum + getVideosByPhase(p.id).length, 0);
+function BusinessCard({ biz, delay, phases, videos }: { biz: Business; delay: number; phases: Phase[]; videos: Video[] }) {
+  const bizPhases = phases.filter(p => p.businessId === biz.id);
+  const videoCount = bizPhases.reduce((sum, p) => sum + videos.filter(v => v.phaseId === p.id).length, 0);
 
   return (
     <Link href={`/roadmap/${biz.slug}`}>
@@ -224,7 +259,7 @@ function BusinessCard({ biz, delay }: { biz: Business; delay: number }) {
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-md text-xs text-muted">
-              <span className="flex items-center gap-xs"><HiOutlineFlag size={11} /> {phases.length}</span>
+              <span className="flex items-center gap-xs"><HiOutlineFlag size={11} /> {bizPhases.length}</span>
               {videoCount > 0 && <span className="flex items-center gap-xs"><HiOutlinePlay size={11} /> {videoCount}</span>}
             </div>
             <span className="flex items-center gap-xs" style={{ color: 'var(--accent-primary)', fontSize: 'var(--font-size-xs)', fontWeight: 500 }}>
