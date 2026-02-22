@@ -1,0 +1,40 @@
+# Implementation Plan: Monorepo Setup for Vercel Deployments
+
+## Goal Description
+The user wants to configure the project as a monorepo containing two separate applications: the `public app` and the `admin app`, so they can be deployed as two separate Vercel projects from a single GitHub repository.
+
+## Propsed Changes
+
+### 1. Root Workspace Configuration
+We will use npm workspaces (or pnpm/yarn depending on what the user prefers, but standard npm workspaces are easiest since [package-lock.json](file:///c:/Users/athar/.gemini/antigravity/scratch/founder-roadmap/package-lock.json) is present).
+*   Create a root [package.json](file:///c:/Users/athar/.gemini/antigravity/scratch/founder-roadmap/package.json) that defines workspaces:
+    ```json
+    {
+      "name": "founder-roadmap-monorepo",
+      "private": true,
+      "workspaces": [
+        "apps/*",
+        "packages/*"
+      ]
+    }
+    ```
+
+### 2. Move Projects to `apps/`
+Move the existing applications into an `apps/` directory to follow standard monorepo conventions.
+*   `learnstart-public` -> `apps/public`
+*   `learnstart-admin` -> `apps/admin` (or `apps/admin-panel` as requested by user)
+
+### 3. Application Cleanups
+Ensure the public app is fully cleansed of admin routes and links, and that the admin app functions independently. (Mostly completed in previous steps, but will verify).
+*   **Public App**: Verify no `/admin` routes exist. If a user visits `/admin`, Next.js will naturally 404, or we can add a redirect in `next.config.ts` to redirect to `/`.
+*   **Admin App**: Verify it connects to the same Supabase database.
+
+### 4. Vercel Deployment Instructions (For User)
+Provide explicit instructions to the user on how to deploy this in Vercel.
+*   **Project 1 (Public Site)**: Connect Repo -> Root Directory: `apps/public` -> Deploy.
+*   **Project 2 (Admin Dashboard)**: Connect Repo -> Root Directory: `apps/admin-panel` -> Deploy.
+
+## Verification Plan
+*   Run `npm install` at the root level to link workspaces.
+*   Run `npm run build -w apps/public` and verify it succeeds.
+*   Run `npm run build -w apps/admin-panel` and verify it succeeds.
